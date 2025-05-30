@@ -6,27 +6,54 @@
 /*   By: jomaia <jomaia@student.42lisboa.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/23 15:39:47 by jomaia            #+#    #+#             */
-/*   Updated: 2025/05/23 16:00:08 by jomaia           ###   ########.fr       */
+/*   Updated: 2025/05/30 11:44:43 by jomaia           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "get_next_line.h"
 
-int	ft_strlen(char const *str)
+char	*get_next_line(int fd)
 {
-	int	len;
+	char		*line;
+	static char	buffer[BUFFER_SIZE + 1];
+	int			readbytes;
 
-	len = 0;
-	if(!str)
-		return(0);
-	while(str[len] != '\n')
-		len++;
-	if(str[len] == '\n')
-		len++;
-	return (len);
+	line = NULL;
+	if (fd < 0 || BUFFER_SIZE <= 0)
+		return (NULL);
+	if (*buffer != '\0')
+		line = ft_strjoin(line, buffer);
+	while (find_new_line(line) == -1)
+	{
+		readbytes = read(fd, buffer, BUFFER_SIZE);
+		if (readbytes < 0)
+		{
+			buffer[0] = '\0';
+			return (free(line), NULL);
+		}
+		if (readbytes == 0)
+			break ;
+		buffer[readbytes] = '\0';
+		line = ft_strjoin(line, buffer);
+	}
+	reset_buffer(buffer);
+	return (line);
 }
 
-int	ft_strjoin(char const *s1, char const *s2)
-{
-	
-}
+// int main(void)
+// {
+// 	int	i;
+// 	int	fd = open("test1.txt", O_RDONLY);
+// 	char *line;
+
+// 	i = 0;
+
+// 	while (i < 10)
+// 	{
+// 		line = get_next_line(fd);
+// 		printf("%s", line);
+// 		free(line);
+// 		i++;
+// 	}
+// 	close(fd);
+// }
